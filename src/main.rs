@@ -1,9 +1,8 @@
+mod storage;
 mod tcx;
 
 use anyhow::Result;
 use askama::Template;
-use std::fs::File;
-use std::io::BufReader;
 
 struct Sample {
     position: geo::Point<f64>,
@@ -30,10 +29,9 @@ impl Sample {
 }
 
 fn main() -> Result<()> {
-    let reader = BufReader::new(File::open("test.tcx")?);
-    let db = tcx::Database::from_reader(reader)?;
-    let laps: Vec<tcx::Lap> = itertools::concat(db.activities.into_iter().map(|a| a.laps));
-    let points: Vec<tcx::TrackPoint> = itertools::concat(laps.into_iter().map(|l| l.track_points));
+    let activities = storage::load("storage")?;
+    let activity = activities.into_iter().map(|a| a.1).nth(0).unwrap();
+    let points = itertools::concat(activity.laps.into_iter().map(|l| l.track_points));
     let samples: Vec<Sample> = points.into_iter().filter_map(|p| Sample::from(p)).collect();
     let template = RenderTemplate { samples };
 
