@@ -8,8 +8,6 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1"
-askama = { version = "0", default-features = false, features = ["with-rocket"] }
-askama_rocket = "0"
 chrono = { version = "0", features = ["serde"] }
 geo = "0"
 itertools = "0"
