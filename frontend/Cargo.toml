@@ -10,5 +10,6 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+anyhow = "1"
 yew = "0"
 wasm-bindgen = "0"

@@ -18,6 +18,11 @@ struct IndexTemplate {}
 
 type ActivityMap = HashMap<chrono::DateTime<Utc>, tcx::Activity>;
 
+#[get("/api/v1/foo")]
+fn foo() -> String {
+    "foo".to_owned()
+}
+
 #[get("/")]
 fn index() -> IndexTemplate {
     IndexTemplate {}
@@ -27,7 +32,7 @@ fn main() -> Result<()> {
     rocket::ignite()
         .manage(storage::load("storage")?)
         .mount("/static", StaticFiles::from("static"))
-        .mount("/", routes![index])
+        .mount("/", routes![index, foo])
         .launch();
 
     Ok(())
