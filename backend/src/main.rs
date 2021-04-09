@@ -33,6 +33,13 @@ fn index() -> Html<&'static str> {
       import init from "./static/wasm.js"
       init()
     </script>
+    <style>
+      #map {
+        margin: auto;
+        width: 100%;
+        height: 600px;
+      }
+    </style>
   </head>
   <body>
   </body>
