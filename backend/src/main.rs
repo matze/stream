@@ -20,8 +20,8 @@ fn activities(storage: State<storage::Map>) -> Json<common::Activities> {
 
 #[get("/api/v1/activity/<id>")]
 fn activity(id: String, storage: State<storage::Map>) -> Json<common::Activity> {
-    let activity = storage.get(&id).unwrap();
-    Json(common::Activity { sport: activity.sport.clone() })
+    let activity = storage.get(&id).unwrap().clone();
+    Json(activity)
 }
 
 #[get("/")]

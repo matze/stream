@@ -1,26 +1,6 @@
 use anyhow::Result;
-use chrono::prelude::*;
+use common::{Activity, TrackPoint, Lap};
 use std::io::Read;
-use uom::si::f32::{Length, Time};
-
-pub struct TrackPoint {
-    pub time: chrono::DateTime<Utc>,
-    pub heart_rate: i32,
-    pub position: Option<geo::Point<f64>>,
-    pub sensor_state: String,
-}
-
-pub struct Lap {
-    pub total_time: Time,
-    pub distance: Length,
-    pub track_points: Vec<TrackPoint>,
-}
-
-pub struct Activity {
-    pub sport: String,
-    pub id: chrono::DateTime<Utc>,
-    pub laps: Vec<Lap>,
-}
 
 pub struct Database {
     pub activities: Vec<Activity>,
@@ -105,7 +85,7 @@ pub mod xml {
         activities: Vec<Activities>,
     }
 
-    impl super::TrackPoint {
+    impl From<Sample> for super::TrackPoint {
         fn from(sample: Sample) -> Self {
             let position = sample.position.map(|p| geo::Point::new(p.lat, p.lon));
 
@@ -118,7 +98,7 @@ pub mod xml {
         }
     }
 
-    impl super::Lap {
+    impl From<Lap> for super::Lap {
         fn from(lap: Lap) -> Self {
             Self {
                 total_time: lap.total_time,
@@ -133,7 +113,7 @@ pub mod xml {
         }
     }
 
-    impl super::Activity {
+    impl From<Activities> for super::Activity {
         fn from(a: Activities) -> Self {
             Self {
                 sport: a.activity.sport,

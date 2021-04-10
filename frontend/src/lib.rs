@@ -1,10 +1,15 @@
-use common::{Activity, Activities};
-use leaflet::{LatLng, Map, TileLayer};
+use common::{Activities, Activity};
+use leaflet::{LatLng, Map, Polyline, TileLayer};
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use yew::format::{Json, Nothing};
 use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
-use yew::services::console::ConsoleService;
+
+#[derive(Serialize, Deserialize)]
+struct PolylineOptions {
+    color: String,
+}
 
 struct Model {
     link: ComponentLink<Self>,
@@ -34,9 +39,7 @@ impl Component for Model {
 
         let component = Self {
             link,
-            activities: Activities {
-                ids: vec![],
-            },
+            activities: Activities { ids: vec![] },
             fetch_task: Some(FetchService::fetch(request, callback).unwrap()),
             map: None,
         };
@@ -64,8 +67,9 @@ impl Component for Model {
                 self.fetch_task = None;
             }
             Msg::Select(id) => {
-                ConsoleService::info(&id);
-                let request = Request::get(format!("/api/v1/activity/{}", id)).body(Nothing).unwrap();
+                let request = Request::get(format!("/api/v1/activity/{}", id))
+                    .body(Nothing)
+                    .unwrap();
                 let callback = self.link.callback(
                     |response: Response<Json<Result<Activity, anyhow::Error>>>| {
                         let Json(data) = response.into_body();
@@ -77,7 +81,26 @@ impl Component for Model {
                 self.fetch_task = Some(FetchService::fetch(request, callback).unwrap());
             }
             Msg::SelectResponse(activity) => {
-                ConsoleService::info(&format!("selected {}", activity.sport));
+                if let Some(map) = &self.map {
+                    for lap in activity.laps {
+                        let points = lap
+                            .track_points
+                            .iter()
+                            .filter_map(|p| p.position)
+                            // 🤨 ...
+                            .map(|p| LatLng::new(p.lng(), p.lat()))
+                            .collect::<Vec<_>>();
+
+                        Polyline::new_with_options(
+                            points.iter().map(JsValue::from).collect(),
+                            &JsValue::from_serde(&PolylineOptions {
+                                color: "blue".to_string(),
+                            })
+                            .unwrap(),
+                        )
+                        .addTo(map);
+                    }
+                }
             }
         }
         true
