@@ -7,16 +7,21 @@ mod storage;
 mod tcx;
 
 use anyhow::Result;
-use chrono::prelude::*;
 use rocket::response::content::Html;
+use rocket::State;
+use rocket_contrib::json::Json;
 use rocket_contrib::serve::StaticFiles;
-use std::collections::HashMap;
 
-type ActivityMap = HashMap<chrono::DateTime<Utc>, tcx::Activity>;
+#[get("/api/v1/activities")]
+fn activities(storage: State<storage::Map>) -> Json<common::Activities> {
+    let ids = storage.keys().map(|k| k.clone()).collect::<Vec<_>>();
+    Json(common::Activities { ids })
+}
 
-#[get("/api/v1/foo")]
-fn foo() -> String {
-    "foo".to_owned()
+#[get("/api/v1/activity/<id>")]
+fn activity(id: String, storage: State<storage::Map>) -> Json<common::Activity> {
+    let activity = storage.get(&id).unwrap();
+    Json(common::Activity { sport: activity.sport.clone() })
 }
 
 #[get("/")]
@@ -52,7 +57,7 @@ fn main() -> Result<()> {
     rocket::ignite()
         .manage(storage::load("storage")?)
         .mount("/static", StaticFiles::from("static"))
-        .mount("/", routes![index, foo])
+        .mount("/", routes![index, activities, activity])
         .launch();
 
     Ok(())

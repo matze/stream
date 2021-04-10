@@ -1,20 +1,22 @@
+use common::{Activity, Activities};
 use leaflet::{LatLng, Map, TileLayer};
 use wasm_bindgen::prelude::*;
-use yew::format::Nothing;
+use yew::format::{Json, Nothing};
 use yew::prelude::*;
-use yew::services::fetch;
-use yew::services::ConsoleService;
+use yew::services::fetch::{FetchService, FetchTask, Request, Response};
+use yew::services::console::ConsoleService;
 
 struct Model {
     link: ComponentLink<Self>,
-    value: String,
-    fetch_task: Option<fetch::FetchTask>,
+    activities: Activities,
+    fetch_task: Option<FetchTask>,
     map: Option<Map>,
 }
 
 enum Msg {
-    AddOne,
-    Get(String),
+    Get(Activities),
+    Select(String),
+    SelectResponse(Activity),
 }
 
 impl Component for Model {
@@ -22,15 +24,20 @@ impl Component for Model {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let request = fetch::Request::get("/api/v1/foo").body(Nothing).unwrap();
-        let callback = link.callback(|response: fetch::Response<Result<String, anyhow::Error>>| {
-            Msg::Get(response.into_body().unwrap())
-        });
+        let request = Request::get("/api/v1/activities").body(Nothing).unwrap();
+        let callback = link.callback(
+            |response: Response<Json<Result<Activities, anyhow::Error>>>| {
+                let Json(data) = response.into_body();
+                Msg::Get(data.unwrap())
+            },
+        );
 
         let component = Self {
             link,
-            value: "".to_owned(),
-            fetch_task: Some(fetch::FetchService::fetch(request, callback).unwrap()),
+            activities: Activities {
+                ids: vec![],
+            },
+            fetch_task: Some(FetchService::fetch(request, callback).unwrap()),
             map: None,
         };
 
@@ -52,18 +59,31 @@ impl Component for Model {
         }
 
         match msg {
-            Msg::AddOne => {}
-            Msg::Get(response) => {
-                ConsoleService::info(&format!("Got {}", response));
-                self.value = response;
+            Msg::Get(activities) => {
+                self.activities = activities;
                 self.fetch_task = None;
+            }
+            Msg::Select(id) => {
+                ConsoleService::info(&id);
+                let request = Request::get(format!("/api/v1/activity/{}", id)).body(Nothing).unwrap();
+                let callback = self.link.callback(
+                    |response: Response<Json<Result<Activity, anyhow::Error>>>| {
+                        let Json(data) = response.into_body();
+                        Msg::SelectResponse(data.unwrap())
+                    },
+                );
+
+                // Can we re-use this?
+                self.fetch_task = Some(FetchService::fetch(request, callback).unwrap());
+            }
+            Msg::SelectResponse(activity) => {
+                ConsoleService::info(&format!("selected {}", activity.sport));
             }
         }
         true
     }
 
     fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        ConsoleService::info(&format!("here"));
         false
     }
 
@@ -71,9 +91,22 @@ impl Component for Model {
         html! {
             <div>
                 <div id="map"></div>
-                <button onclick=self.link.callback(|_| Msg::AddOne)>{ "+1" }</button>
-                <p>{ self.value.clone() }</p>
+                <ul>
+                    { for self.activities.ids.iter().map(|e| self.view_activity(e)) }
+                </ul>
             </div>
+        }
+    }
+}
+
+impl Model {
+    fn view_activity(&self, id: &String) -> Html {
+        let select_id = id.clone();
+
+        html! {
+            <li>
+            <label onclick=self.link.callback(move |_| Msg::Select(select_id.clone()))>{ id }</label>
+            </li>
         }
     }
 }

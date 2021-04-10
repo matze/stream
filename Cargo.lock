@@ -219,6 +219,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "common"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "serde",
+]
+
+[[package]]
 name = "console_error_panic_hook"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -345,6 +353,8 @@ name = "frontend"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono",
+ "common",
  "leaflet",
  "wasm-bindgen",
  "yew",
@@ -654,6 +664,12 @@ checksum = "322f4de77956e22ed0e5032c359a0f1273f1f7f0d79bfa3b8ffbc730d7fbcc5c"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "hex"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "hkdf"
@@ -1193,6 +1209,8 @@ dependencies = [
  "log 0.4.14",
  "notify",
  "rocket",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -1331,12 +1349,15 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
+ "common",
  "geo",
+ "hex",
  "itertools",
  "rocket",
  "rocket_contrib",
  "serde",
  "serde-xml-rs",
+ "sha2",
  "uom",
 ]
 

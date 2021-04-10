@@ -8,11 +8,14 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1"
+common = { path = "../common" }
 chrono = { version = "0", features = ["serde"] }
 geo = "0"
+hex = "0"
 itertools = "0"
 serde = { version = "1", features = ["derive"] }
 serde-xml-rs = "0"
+sha2 = "0"
 rocket = "0.4"
-rocket_contrib = { version = "0.4", default-features = false, features = ["serve"] }
+rocket_contrib = { version = "0.4", default-features = false, features = ["serve", "json"] }
 uom = { version = "0", features = ["f32", "si", "use_serde"] }
