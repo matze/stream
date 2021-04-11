@@ -34,7 +34,6 @@ pub enum Sport {
 pub struct Activity {
     pub sport: Sport,
     pub id: chrono::DateTime<Utc>,
-    pub laps: Vec<Lap>,
 }
 
 impl From<tcx::Sample> for TrackPoint {
@@ -71,20 +70,6 @@ impl From<tcx::Sport> for Sport {
             tcx::Sport::Running => Sport::Running,
             tcx::Sport::Biking => Sport::Biking,
             tcx::Sport::Other => Sport::Other,
-        }
-    }
-}
-
-impl From<tcx::Activity> for Activity {
-    fn from(activity: tcx::Activity) -> Self {
-        Self {
-            sport: Sport::from(activity.sport),
-            id: activity.id,
-            laps: activity
-                .laps
-                .into_iter()
-                .map(|lap| Lap::from(lap))
-                .collect(),
         }
     }
 }

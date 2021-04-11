@@ -1,4 +1,4 @@
-use common::{Activities, Activity};
+use common::{Activities, Lap};
 use leaflet::{LatLng, Map, Polyline, TileLayer};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
@@ -21,7 +21,7 @@ struct Model {
 enum Msg {
     Get(Activities),
     Select(String),
-    SelectResponse(Activity),
+    SelectResponse(Vec<Lap>),
 }
 
 impl Component for Model {
@@ -67,11 +67,11 @@ impl Component for Model {
                 self.fetch_task = None;
             }
             Msg::Select(id) => {
-                let request = Request::get(format!("/api/v1/activity/{}", id))
+                let request = Request::get(format!("/api/v1/activity/{}/laps", id))
                     .body(Nothing)
                     .unwrap();
                 let callback = self.link.callback(
-                    |response: Response<Json<Result<Activity, anyhow::Error>>>| {
+                    |response: Response<Json<Result<Vec<Lap>, anyhow::Error>>>| {
                         let Json(data) = response.into_body();
                         Msg::SelectResponse(data.unwrap())
                     },
@@ -80,9 +80,9 @@ impl Component for Model {
                 // Can we re-use this?
                 self.fetch_task = Some(FetchService::fetch(request, callback).unwrap());
             }
-            Msg::SelectResponse(activity) => {
+            Msg::SelectResponse(laps) => {
                 if let Some(map) = &self.map {
-                    for lap in activity.laps {
+                    for lap in laps {
                         let points = lap
                             .track_points
                             .iter()

@@ -7,6 +7,7 @@ use std::path::Path;
 
 pub struct Database {
     pub activities: HashMap<String, common::Activity>,
+    pub laps: HashMap<String, Vec<common::Lap>>,
 }
 
 fn read_activities<R: Read>(reader: R) -> Result<Vec<tcx::Activity>> {
@@ -20,7 +21,8 @@ fn read_activities<R: Read>(reader: R) -> Result<Vec<tcx::Activity>> {
 
 impl Database {
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let mut activities = HashMap::new();
+        let mut indexed_activities = HashMap::new();
+        let mut indexed_laps = HashMap::new();
 
         for filename in read_dir(path)? {
             let reader = BufReader::new(File::open(filename?.path())?);
@@ -28,10 +30,31 @@ impl Database {
             for activity in read_activities(reader)? {
                 let mut hasher = Sha256::new();
                 hasher.update(activity.id.to_string().as_bytes());
-                activities.insert(hex::encode(hasher.finalize()), common::Activity::from(activity));
+
+                let tcx::Activity { sport, id, laps } = activity;
+
+                let index = hex::encode(hasher.finalize());
+
+                indexed_laps.insert(
+                    index.clone(),
+                    laps.into_iter()
+                        .map(|l| common::Lap::from(l))
+                        .collect::<Vec<_>>(),
+                );
+
+                indexed_activities.insert(
+                    index,
+                    common::Activity {
+                        sport: common::Sport::from(sport),
+                        id,
+                    },
+                );
             }
         }
 
-        Ok(Self { activities })
+        Ok(Self {
+            activities: indexed_activities,
+            laps: indexed_laps,
+        })
     }
 }

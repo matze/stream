@@ -18,10 +18,9 @@ fn activities(db: State<Database>) -> Json<common::Activities> {
     Json(common::Activities { ids })
 }
 
-#[get("/api/v1/activity/<id>")]
-fn activity(id: String, db: State<Database>) -> Json<common::Activity> {
-    let activity = db.activities.get(&id).unwrap().clone();
-    Json(activity)
+#[get("/api/v1/activity/<id>/laps")]
+fn laps(id: String, db: State<Database>) -> Json<Vec<common::Lap>> {
+    Json(db.laps.get(&id).unwrap().clone())
 }
 
 #[get("/")]
@@ -57,7 +56,7 @@ fn main() -> Result<()> {
     rocket::ignite()
         .manage(Database::new("storage")?)
         .mount("/static", StaticFiles::from("static"))
-        .mount("/", routes![index, activities, activity])
+        .mount("/", routes![index, activities, laps])
         .launch();
 
     Ok(())
