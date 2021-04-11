@@ -1,11 +1,29 @@
-use crate::tcx::Database;
+// use crate::tcx::Database;
 use anyhow::Result;
 use common::Activity;
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::fs::{read_dir, File};
-use std::io::BufReader;
+use std::io::{BufReader, Read};
 use std::path::Path;
+
+pub struct Database {
+    pub activities: Vec<Activity>,
+}
+
+impl Database {
+    pub fn from_reader<R: Read>(reader: R) -> Result<Self> {
+        let db = tcx::TrainingCenterDatabase::from_reader(reader)?;
+
+        Ok(Database {
+            activities: db
+                .activities
+                .into_iter()
+                .map(|a| Activity::from(a))
+                .collect(),
+        })
+    }
+}
 
 /// Map hashed activity identifier to activity
 pub type Map = HashMap<String, Activity>;
