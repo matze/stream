@@ -24,8 +24,15 @@ pub struct Lap {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
+pub enum Sport {
+    Running,
+    Biking,
+    Other,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Activity {
-    pub sport: String,
+    pub sport: Sport,
     pub id: chrono::DateTime<Utc>,
     pub laps: Vec<Lap>,
 }

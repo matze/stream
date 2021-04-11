@@ -1,5 +1,5 @@
 use anyhow::Result;
-use common::{Activity, TrackPoint, Lap};
+use common::{Activity, TrackPoint, Lap, Sport};
 use std::io::Read;
 
 pub struct Database {
@@ -62,9 +62,16 @@ pub mod xml {
     }
 
     #[derive(Deserialize)]
+    enum Sport {
+        Running,
+        Biking,
+        Other,
+    }
+
+    #[derive(Deserialize)]
     struct Activity {
         #[serde(rename = "Sport")]
-        sport: String,
+        sport: Sport,
 
         #[serde(rename = "Id")]
         id: chrono::DateTime<Utc>,
@@ -113,10 +120,20 @@ pub mod xml {
         }
     }
 
+    impl From<Sport> for super::Sport {
+        fn from(sport: Sport) -> Self {
+            match sport {
+                Sport::Running => super::Sport::Running,
+                Sport::Biking => super::Sport::Biking,
+                Sport::Other => super::Sport::Other,
+            }
+        }
+    }
+
     impl From<Activities> for super::Activity {
         fn from(a: Activities) -> Self {
             Self {
-                sport: a.activity.sport,
+                sport: super::Sport::from(a.activity.sport),
                 id: a.activity.id,
                 laps: a
                     .activity
