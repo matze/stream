@@ -9,7 +9,6 @@ edition = "2018"
 [dependencies]
 anyhow = "1"
 chrono = { version = "0", features = ["serde"] }
-common = { path = "../common" }
 geo = "0"
 serde = { version = "1", features = ["derive"] }
 serde-xml-rs = "0"

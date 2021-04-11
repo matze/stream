@@ -225,6 +225,7 @@ dependencies = [
  "chrono",
  "geo",
  "serde",
+ "tcx",
  "uom",
 ]
 
@@ -1383,7 +1384,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
- "common",
  "geo",
  "serde",
  "serde-xml-rs",

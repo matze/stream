@@ -36,3 +36,55 @@ pub struct Activity {
     pub id: chrono::DateTime<Utc>,
     pub laps: Vec<Lap>,
 }
+
+impl From<tcx::Sample> for TrackPoint {
+    fn from(sample: tcx::Sample) -> Self {
+        let position = sample.position.map(|p| geo::Point::new(p.lat, p.lon));
+
+        Self {
+            time: sample.time,
+            heart_rate: sample.heart_rate.value,
+            sensor_state: sample.sensor_state,
+            position,
+        }
+    }
+}
+
+impl From<tcx::Lap> for Lap {
+    fn from(lap: tcx::Lap) -> Self {
+        Self {
+            total_time: lap.total_time,
+            distance: lap.distance,
+            track_points: lap
+                .track
+                .samples
+                .into_iter()
+                .map(|sample| TrackPoint::from(sample))
+                .collect(),
+        }
+    }
+}
+
+impl From<tcx::Sport> for Sport {
+    fn from(sport: tcx::Sport) -> Self {
+        match sport {
+            tcx::Sport::Running => Sport::Running,
+            tcx::Sport::Biking => Sport::Biking,
+            tcx::Sport::Other => Sport::Other,
+        }
+    }
+}
+
+impl From<tcx::Activity> for Activity {
+    fn from(activity: tcx::Activity) -> Self {
+        Self {
+            sport: Sport::from(activity.sport),
+            id: activity.id,
+            laps: activity
+                .laps
+                .into_iter()
+                .map(|lap| Lap::from(lap))
+                .collect(),
+        }
+    }
+}

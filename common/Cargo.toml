@@ -10,4 +10,5 @@ edition = "2018"
 geo = { version = "0", features = ["use-serde"] }
 chrono = { version = "0", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
+tcx = { path = "../tcx" }
 uom = { version = "0", features = ["f32", "si", "use_serde"] }
