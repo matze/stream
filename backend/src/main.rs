@@ -3,23 +3,24 @@
 #[macro_use]
 extern crate rocket;
 
-mod storage;
+mod database;
 
 use anyhow::Result;
+use database::Database;
 use rocket::response::content::Html;
 use rocket::State;
 use rocket_contrib::json::Json;
 use rocket_contrib::serve::StaticFiles;
 
 #[get("/api/v1/activities")]
-fn activities(storage: State<storage::Map>) -> Json<common::Activities> {
-    let ids = storage.keys().map(|k| k.clone()).collect::<Vec<_>>();
+fn activities(db: State<Database>) -> Json<common::Activities> {
+    let ids = db.activities.keys().map(|k| k.clone()).collect::<Vec<_>>();
     Json(common::Activities { ids })
 }
 
 #[get("/api/v1/activity/<id>")]
-fn activity(id: String, storage: State<storage::Map>) -> Json<common::Activity> {
-    let activity = storage.get(&id).unwrap().clone();
+fn activity(id: String, db: State<Database>) -> Json<common::Activity> {
+    let activity = db.activities.get(&id).unwrap().clone();
     Json(activity)
 }
 
@@ -54,7 +55,7 @@ fn index() -> Html<&'static str> {
 
 fn main() -> Result<()> {
     rocket::ignite()
-        .manage(storage::load("storage")?)
+        .manage(Database::new("storage")?)
         .mount("/static", StaticFiles::from("static"))
         .mount("/", routes![index, activities, activity])
         .launch();

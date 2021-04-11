@@ -128,13 +128,12 @@ impl From<Sport> for common::Sport {
     }
 }
 
-impl From<Activities> for common::Activity {
-    fn from(a: Activities) -> Self {
+impl From<Activity> for common::Activity {
+    fn from(activity: Activity) -> Self {
         Self {
-            sport: common::Sport::from(a.activity.sport),
-            id: a.activity.id,
-            laps: a
-                .activity
+            sport: common::Sport::from(activity.sport),
+            id: activity.id,
+            laps: activity
                 .laps
                 .into_iter()
                 .map(|lap| common::Lap::from(lap))
