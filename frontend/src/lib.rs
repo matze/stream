@@ -1,4 +1,4 @@
-use common::{Activities, Lap};
+use common::{Activity, Lap};
 use leaflet::{LatLng, Map, Polyline, TileLayer};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
@@ -13,13 +13,13 @@ struct PolylineOptions {
 
 struct Model {
     link: ComponentLink<Self>,
-    activities: Activities,
+    activities: Vec<Activity>,
     fetch_task: Option<FetchTask>,
     map: Option<Map>,
 }
 
 enum Msg {
-    Get(Activities),
+    Get(Vec<Activity>),
     Select(String),
     SelectResponse(Vec<Lap>),
 }
@@ -31,7 +31,7 @@ impl Component for Model {
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
         let request = Request::get("/api/v1/activities").body(Nothing).unwrap();
         let callback = link.callback(
-            |response: Response<Json<Result<Activities, anyhow::Error>>>| {
+            |response: Response<Json<Result<Vec<Activity>, anyhow::Error>>>| {
                 let Json(data) = response.into_body();
                 Msg::Get(data.unwrap())
             },
@@ -39,7 +39,7 @@ impl Component for Model {
 
         let component = Self {
             link,
-            activities: Activities { ids: vec![] },
+            activities: vec![],
             fetch_task: Some(FetchService::fetch(request, callback).unwrap()),
             map: None,
         };
@@ -115,7 +115,7 @@ impl Component for Model {
             <div>
                 <div id="map"></div>
                 <ul>
-                    { for self.activities.ids.iter().map(|e| self.view_activity(e)) }
+                    { for self.activities.iter().map(|a| self.view_activity(a)) }
                 </ul>
             </div>
         }
@@ -123,8 +123,9 @@ impl Component for Model {
 }
 
 impl Model {
-    fn view_activity(&self, id: &String) -> Html {
-        let select_id = id.clone();
+    fn view_activity(&self, activity: &Activity) -> Html {
+        let id = activity.id.clone();
+        let select_id = activity.id.clone();
 
         html! {
             <li>

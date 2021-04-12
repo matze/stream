@@ -13,9 +13,8 @@ use rocket_contrib::json::Json;
 use rocket_contrib::serve::StaticFiles;
 
 #[get("/api/v1/activities")]
-fn activities(db: State<Database>) -> Json<common::Activities> {
-    let ids = db.activities.keys().map(|k| String::from(k)).collect::<Vec<_>>();
-    Json(common::Activities { ids })
+fn activities(db: State<Database>) -> Json<Vec<common::Activity>> {
+    Json(db.activities.clone())
 }
 
 #[get("/api/v1/activity/<id>/laps")]

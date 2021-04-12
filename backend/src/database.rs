@@ -33,7 +33,7 @@ impl From<&Id> for String {
 }
 
 pub struct Database {
-    pub activities: HashMap<Id, common::Activity>,
+    pub activities: Vec<common::Activity>,
     pub laps: HashMap<Id, Vec<common::Lap>>,
 }
 
@@ -48,7 +48,7 @@ fn read_activities<R: Read>(reader: R) -> Result<Vec<tcx::Activity>> {
 
 impl Database {
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let mut indexed_activities = HashMap::new();
+        let mut indexed_activities = vec![];
         let mut indexed_laps = HashMap::new();
 
         for filename in read_dir(path)? {
@@ -56,21 +56,20 @@ impl Database {
 
             for activity in read_activities(reader)? {
                 let new_id = Id::new(&activity.id.to_string());
-                let tcx::Activity { sport, id, laps } = activity;
+                let tcx::Activity { sport, id: _, laps } = activity;
+
+                indexed_activities.push(
+                    common::Activity {
+                        sport: common::Sport::from(sport),
+                        id: String::from(&new_id),
+                    },
+                );
 
                 indexed_laps.insert(
-                    new_id.clone(),
+                    new_id,
                     laps.into_iter()
                         .map(|l| common::Lap::from(l))
                         .collect::<Vec<_>>(),
-                );
-
-                indexed_activities.insert(
-                    new_id,
-                    common::Activity {
-                        sport: common::Sport::from(sport),
-                        id,
-                    },
                 );
             }
         }
