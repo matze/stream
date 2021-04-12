@@ -14,13 +14,14 @@ use rocket_contrib::serve::StaticFiles;
 
 #[get("/api/v1/activities")]
 fn activities(db: State<Database>) -> Json<common::Activities> {
-    let ids = db.activities.keys().map(|k| k.clone()).collect::<Vec<_>>();
+    let ids = db.activities.keys().map(|k| String::from(k)).collect::<Vec<_>>();
     Json(common::Activities { ids })
 }
 
 #[get("/api/v1/activity/<id>/laps")]
 fn laps(id: String, db: State<Database>) -> Json<Vec<common::Lap>> {
-    Json(db.laps.get(&id).unwrap().clone())
+    let hash = database::Id::from(&id).unwrap();
+    Json(db.laps.get(&hash).unwrap().clone())
 }
 
 #[get("/")]

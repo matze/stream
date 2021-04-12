@@ -1311,6 +1311,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "sha2-const"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "100857b8e850a74222a6445f68b8797fa8488f2364335c346db40fde016c92cd"
+
+[[package]]
 name = "slab"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1345,7 +1351,7 @@ dependencies = [
  "rocket",
  "rocket_contrib",
  "serde",
- "sha2",
+ "sha2-const",
  "tcx",
  "uom",
 ]
