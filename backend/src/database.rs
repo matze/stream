@@ -58,19 +58,31 @@ impl Database {
                 let new_id = Id::new(&activity.id.to_string());
                 let tcx::Activity { sport, id: _, laps } = activity;
 
-                indexed_activities.push(
-                    common::Activity {
-                        sport: common::Sport::from(sport),
-                        id: String::from(&new_id),
-                    },
-                );
+                let mut average_heart_rate: f64 = 0.0;
 
-                indexed_laps.insert(
-                    new_id,
-                    laps.into_iter()
-                        .map(|l| common::Lap::from(l))
-                        .collect::<Vec<_>>(),
-                );
+                let laps = laps
+                    .into_iter()
+                    .map(|l| common::Lap::from(l))
+                    .collect::<Vec<_>>();
+
+                for lap in &laps {
+                    average_heart_rate += lap
+                        .track_points
+                        .iter()
+                        .map(|p| p.heart_rate as f64)
+                        .sum::<f64>()
+                        / (lap.track_points.len() as f64);
+                }
+
+                average_heart_rate /= laps.len() as f64;
+
+                indexed_activities.push(common::Activity {
+                    sport: common::Sport::from(sport),
+                    id: String::from(&new_id),
+                    average_heart_rate,
+                });
+
+                indexed_laps.insert(new_id, laps);
             }
         }
 

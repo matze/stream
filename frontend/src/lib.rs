@@ -125,11 +125,10 @@ impl Component for Model {
 impl Model {
     fn view_activity(&self, activity: &Activity) -> Html {
         let id = activity.id.clone();
-        let select_id = activity.id.clone();
 
         html! {
             <li>
-            <label onclick=self.link.callback(move |_| Msg::Select(select_id.clone()))>{ id }</label>
+            <label onclick=self.link.callback(move |_| Msg::Select(id.clone()))>{ activity.average_heart_rate }</label>
             </li>
         }
     }
