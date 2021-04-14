@@ -5,6 +5,8 @@ use std::convert::TryInto;
 use std::fs::{read_dir, File};
 use std::io::{BufReader, Read};
 use std::path::Path;
+use uom::si::f32::Length;
+use uom::si::length::kilometer;
 
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Id {
@@ -59,6 +61,7 @@ impl Database {
                 let tcx::Activity { sport, id: _, laps } = activity;
 
                 let mut average_heart_rate: f64 = 0.0;
+                let mut total_distance: Length = Length::new::<kilometer>(0.0);
 
                 let laps = laps
                     .into_iter()
@@ -72,6 +75,8 @@ impl Database {
                         .map(|p| p.heart_rate as f64)
                         .sum::<f64>()
                         / (lap.track_points.len() as f64);
+
+                    total_distance += lap.distance;
                 }
 
                 average_heart_rate /= laps.len() as f64;
@@ -80,6 +85,7 @@ impl Database {
                     sport: common::Sport::from(sport),
                     id: String::from(&new_id),
                     average_heart_rate,
+                    total_distance,
                 });
 
                 indexed_laps.insert(new_id, laps);

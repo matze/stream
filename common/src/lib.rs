@@ -29,6 +29,7 @@ pub struct Activity {
     pub sport: Sport,
     pub id: String,
     pub average_heart_rate: f64,
+    pub total_distance: Length,
 }
 
 impl From<tcx::Sample> for TrackPoint {

@@ -354,6 +354,7 @@ dependencies = [
  "common",
  "leaflet",
  "serde",
+ "uom",
  "wasm-bindgen",
  "yew",
 ]

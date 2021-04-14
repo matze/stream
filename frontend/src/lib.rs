@@ -5,6 +5,9 @@ use wasm_bindgen::prelude::*;
 use yew::format::{Json, Nothing};
 use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
+use uom::si::length::kilometer;
+use uom::si::f32::Length;
+use uom::fmt::DisplayStyle::Abbreviation;
 
 #[derive(Serialize, Deserialize)]
 struct PolylineOptions {
@@ -125,10 +128,11 @@ impl Component for Model {
 impl Model {
     fn view_activity(&self, activity: &Activity) -> Html {
         let id = activity.id.clone();
+        let a = Length::format_args(kilometer, Abbreviation);
 
         html! {
             <li>
-            <label onclick=self.link.callback(move |_| Msg::Select(id.clone()))>{ activity.average_heart_rate }</label>
+            <label onclick=self.link.callback(move |_| Msg::Select(id.clone()))>{ activity.average_heart_rate } { format!("{}", a.with(activity.total_distance)) } </label>
             </li>
         }
     }
