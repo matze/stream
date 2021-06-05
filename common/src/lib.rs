@@ -1,13 +1,14 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use uom::si::f32::{Length, Time};
+use uom::si::f64::{Length, Time};
+use uom::si::time::second;
+use uom::si::length::meter;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TrackPoint {
     pub time: chrono::DateTime<Utc>,
     pub heart_rate: i32,
     pub position: Option<geo::Point<f64>>,
-    pub sensor_state: String,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -39,7 +40,6 @@ impl From<tcx::Sample> for TrackPoint {
         Self {
             time: sample.time,
             heart_rate: sample.heart_rate.value,
-            sensor_state: sample.sensor_state,
             position,
         }
     }
@@ -48,8 +48,8 @@ impl From<tcx::Sample> for TrackPoint {
 impl From<tcx::Lap> for Lap {
     fn from(lap: tcx::Lap) -> Self {
         Self {
-            total_time: lap.total_time,
-            distance: lap.distance,
+            total_time: Time::new::<second>(lap.time),
+            distance: Length::new::<meter>(lap.distance),
             track_points: lap
                 .track
                 .samples

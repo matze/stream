@@ -5,7 +5,7 @@ use std::convert::TryInto;
 use std::fs::{read_dir, File};
 use std::io::{BufReader, Read};
 use std::path::Path;
-use uom::si::f32::Length;
+use uom::si::f64::Length;
 use uom::si::length::kilometer;
 
 #[derive(PartialEq, Eq, Hash, Clone)]
@@ -40,7 +40,7 @@ pub struct Database {
 }
 
 fn read_activities<R: Read>(reader: R) -> Result<Vec<tcx::Activity>> {
-    let db = tcx::TrainingCenterDatabase::from_reader(reader)?;
+    let db = tcx::Database::new(reader)?;
     Ok(db
         .activities
         .into_iter()
